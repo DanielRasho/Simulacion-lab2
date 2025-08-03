@@ -21,9 +21,9 @@ def newton(f, df, startingPoint, maxIter, tolerance):
     print("Method did not converge.")
     return x
 
-f = lambda x : x
-df = lambda x : x
+f = lambda x : x**3 - 2 * x + 2
+df = lambda x : 3 * x**2 - 2
 tol = 1e-7
 
 print("NEWTON \n")
-newton(f, df, 3, 40, tol)
+newton(f, df, 0, 10, tol)

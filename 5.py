@@ -1,4 +1,3 @@
-
 def biseccion(f, interval, maxIter, tolerance):
     x0, x1 = interval
 
@@ -6,8 +5,7 @@ def biseccion(f, interval, maxIter, tolerance):
         new_x = (x0 + x1) / 2
         new_y = f(new_x)
 
-        print(f"Iter {i}: x = {new_x}, f(x) = {new_y}")
-
+        #print(f"Iter {i}: x = {new_x}, f(x) = {new_y}")
         # Stopping condition
         if abs(new_y) < tolerance or abs(x1 - x0) < tolerance:
             return new_x
@@ -53,8 +51,7 @@ def newton(f, df, startingPoint, maxIter, tolerance):
             return None  # Avoid division by zero
 
         next_x = x - f_x / df_x
-
-        print(f"Iter {i}: x = {x}, f(x) = {f_x}, df(x) = {df_x}, next_x = {next_x}")
+        # print(f"Iter {i}: x = {x}, f(x) = {f_x}, df(x) = {df_x}, next_x = {next_x}")
 
         if abs(next_x - x) < tolerance or abs(f_x) < tolerance:
             return next_x
@@ -64,15 +61,61 @@ def newton(f, df, startingPoint, maxIter, tolerance):
     print("Method did not converge.")
     return x
 
-f = lambda x : x
-df = lambda x : x
+def add_root_if_new(roots, root, tolerance):
+    if root is not None and all(abs(root - r) > tolerance for r in roots):
+        roots.append(root)
+
+def find_all_roots_bisection(f, interval, steps, maxIter=100, tolerance=1e-6):
+    x_start, x_end = interval
+    step_size = (x_end - x_start) / steps
+    roots = []
+
+    for i in range(steps):
+        x0 = x_start + i * step_size
+        x1 = x0 + step_size
+        y0 = f(x0)
+        y1 = f(x1)
+
+        if y0 * y1 <= 0:  # sign change or exactly zero
+            root = biseccion(f, (x0, x1), maxIter, tolerance)
+            if all(abs(root - r) > tolerance for r in roots):  # avoid duplicates
+                roots.append(root)
+
+    return roots
+
+def find_all_roots_secant(f, interval, steps, maxIter=100, tolerance=1e-6):
+    x_start, x_end = interval
+    step_size = (x_end - x_start) / steps
+    roots = []
+
+    for i in range(steps):
+        x0 = x_start + i * step_size
+        x1 = x0 + step_size
+        y0 = f(x0)
+        y1 = f(x1)
+
+        if y0 * y1 <= 0:  # likely a sign change
+            root = secant(f, (x0, x1), maxIter, tolerance)
+            add_root_if_new(roots, root, tolerance)
+
+    return roots
+
+def find_all_roots_newton(f, df, interval, steps, maxIter=100, tolerance=1e-6):
+    x_start, x_end = interval
+    step_size = (x_end - x_start) / steps
+    roots = []
+
+    for i in range(steps):
+        x0 = x_start + i * step_size
+        root = newton(f, df, x0, maxIter, tolerance)
+        add_root_if_new(roots, root, tolerance)
+
+    return roots
+
+f = lambda x : x**2 + (1 / (x - 7))
+df = lambda x : 2*x - 1/((x-7)**2)
 tol = 1e-7
 
-print("BISECCION \n")
-biseccion(f, (), 40, tol)
-
-print("SECANT \n")
-secant(f, (), 40, tol)
-
-print("NEWTON \n")
-newton(f, df, 3, 40, tol)
+print("bisection roots:", find_all_roots_bisection(f, (-1 , 1), steps=100, tolerance=tol))
+print("Secant roots:", find_all_roots_secant(f, (-1 , 1), steps=100, tolerance=tol))
+print("Newton roots:", find_all_roots_newton(f, df, (-1 , 1), steps=100, tolerance=tol))
