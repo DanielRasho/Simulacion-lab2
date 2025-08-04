@@ -22,6 +22,7 @@
       pkgs = nixpkgsFor.${system};
       python = pkgs.python3.withPackages (p: [
         p.pulp
+        p.sympy
         p.jupyterlab
       ]);
     in {
